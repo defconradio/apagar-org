@@ -8,7 +8,7 @@ A production-ready Kotlin Multiplatform scaffold designed for scalability, featu
 
 *   **Architecture:** Clean Architecture + MVVM (Model-View-ViewModel)
 *   **Dependency Injection:** [Koin](https://insert-koin.io/) (v4.0.0)
-*   **Networking:** [Ktor](https://ktor.io/) (v3.0.0-rc-1) with ContentNegotiation & Serialization
+*   **Networking:** [Ktor](https://ktor.io/) (v3.0.1) with ContentNegotiation & Serialization
 *   **Logging:** [Napier](https://github.com/AAkira/Napier) (v2.7.1)
 *   **Resources:** [JetBrains Compose Multiplatform Resources](https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources.html) (Shared Strings, Images, Fonts)
 *   **Persistence:** [AndroidX DataStore](https://developer.android.com/topic/libraries/architecture/datastore) (Preferences)
