@@ -1,0 +1,19 @@
+# DO NOT DELETE THIS FILE FAST ACCESS GRADLEW COMMANDS SYSOP RELATE
+# DO NO COMMIT THIS FILE A DRAGON WILL UNPLUG YOU IF THIS FILE ON THE GIT
+# WASM dev fast
+# old keep as ref
+#./gradlew --stop && export CHROME_BIN=$(which chromium || which chromium-browser) &&
+#./gradlew kotlinUpgradeYarnLock --no-daemon && ./gradlew clean build --no-daemon
+#export CHROME_BIN=/usr/bin/chromium-browser; ./gradlew :shared:wasmJsBrowserTest
+
+
+./gradlew :composeApp:wasmJsBrowserDevelopmentDistribution
+./gradlew :composeApp:wasmJsBrowserDistribution
+#Alternative live-reload dev server (if you don't need the custom COOP/COEP headers):
+./gradlew :composeApp:wasmJsBrowserDevelopmentRun
+
+LD_PRELOAD= python3 scripts/serve_wasm.py
+LD_PRELOAD= python3 scripts/serve_wasm.py --prod
+LD_PRELOAD= python3 scripts/serve_wasm.py --port 8081
+pkill -f serve_wasm.py
+#Hard refresh (Ctrl+Shift+R) in the browser after rebuilding so cached .wasm/.js files don't linger.

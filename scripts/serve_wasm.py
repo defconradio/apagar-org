@@ -11,6 +11,13 @@ PROD_DIR = "composeApp/build/dist/wasmJs/productionExecutable"
 
 
 class CrossOriginIsolatedHandler(http.server.SimpleHTTPRequestHandler):
+    extensions_map = {
+        **http.server.SimpleHTTPRequestHandler.extensions_map,
+        ".wasm": "application/wasm",
+        ".js": "application/javascript",
+        ".mjs": "application/javascript",
+    }
+
     def end_headers(self):
         # Cross-Origin Isolation headers required for Wasm (SharedArrayBuffer / threads)
         # "same-origin-allow-popups" keeps OAuth/Sign-In popups working.
