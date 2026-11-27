@@ -14,8 +14,8 @@ actual fun SystemBarColoring() {
         window?.let {
             SideEffect {
                 val controller = WindowCompat.getInsetsController(it, view)
-                controller.isAppearanceLightStatusBars = false
-                controller.isAppearanceLightNavigationBars = false
+                controller.isAppearanceLightStatusBars = true
+                controller.isAppearanceLightNavigationBars = true
             }
         }
     }

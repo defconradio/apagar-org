@@ -1,8 +1,11 @@
 package org.apagar.shared.presentation
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,9 +22,11 @@ import org.apagar.shared.domain.usecase.CalculateDebtInvoiceUseCase
 
 class DebtQuizViewModel(
     private val repository: DebtDataRepository,
-    private val calculateDebtInvoiceUseCase: CalculateDebtInvoiceUseCase
+    private val calculateDebtInvoiceUseCase: CalculateDebtInvoiceUseCase,
+    dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) {
-    private val viewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val viewModelScope = CoroutineScope(SupervisorJob() + dispatcher)
+    private var calculationJob: Job? = null
 
     private val countries = repository.getCountries()
     private val initialCountry = countries.first()
@@ -38,6 +43,7 @@ class DebtQuizViewModel(
     val uiState: StateFlow<DebtQuizUiState> = _uiState.asStateFlow()
 
     fun startQuiz() {
+        calculationJob?.cancel()
         _uiState.update {
             it.copy(
                 step = QuizScreenStep.QuestionStep(0),
@@ -70,7 +76,7 @@ class DebtQuizViewModel(
     fun nextStep() {
         val currentStep = _uiState.value.step
         if (currentStep is QuizScreenStep.QuestionStep) {
-            if (currentStep.stepIndex < 4) {
+            if (currentStep.stepIndex < LAST_STEP_INDEX) {
                 _uiState.update { it.copy(step = QuizScreenStep.QuestionStep(currentStep.stepIndex + 1)) }
             } else {
                 submitQuiz()
@@ -101,7 +107,8 @@ class DebtQuizViewModel(
             selectedStealthOption = stealthOption
         )
 
-        viewModelScope.launch {
+        calculationJob?.cancel()
+        calculationJob = viewModelScope.launch {
             _uiState.update { it.copy(step = QuizScreenStep.Calculating("Consultando reservas del Banco Central...")) }
             delay(700)
             _uiState.update { it.copy(step = QuizScreenStep.Calculating("Calculando intereses moratorios acumulados...")) }
@@ -115,6 +122,7 @@ class DebtQuizViewModel(
     }
 
     fun resetQuiz() {
+        calculationJob?.cancel()
         _uiState.update {
             it.copy(
                 step = QuizScreenStep.Intro,
@@ -122,5 +130,14 @@ class DebtQuizViewModel(
                 selectedStealthOption = null
             )
         }
+    }
+
+    fun clear() {
+        viewModelScope.cancel()
+    }
+
+    companion object {
+        const val TOTAL_STEPS = 5
+        private const val LAST_STEP_INDEX = TOTAL_STEPS - 1
     }
 }

@@ -28,6 +28,26 @@ class LocalDebtDataRepositoryImpl : DebtDataRepository {
             activeTaxpayerRatio = 0.48,
             dataSourceNoteEs = "Deuda Pública Bruta Nacional",
             lastUpdatedYear = 2026
+        ),
+        CountryDebtProfile(
+            code = "US",
+            nameEs = "Estados Unidos",
+            flagEmoji = "🇺🇸",
+            totalDebtUsd = 35_400_000_000_000.0,
+            totalPopulation = 340_000_000L,
+            activeTaxpayerRatio = 0.50,
+            dataSourceNoteEs = "Deuda Pública Federal Total",
+            lastUpdatedYear = 2026
+        ),
+        CountryDebtProfile(
+            code = "ES",
+            nameEs = "España",
+            flagEmoji = "🇪🇸",
+            totalDebtUsd = 1_650_000_000_000.0,
+            totalPopulation = 48_600_000L,
+            activeTaxpayerRatio = 0.46,
+            dataSourceNoteEs = "Deuda Pública según Protocolo PDE",
+            lastUpdatedYear = 2026
         )
     )
 

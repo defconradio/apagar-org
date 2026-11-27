@@ -5,7 +5,6 @@ import io.github.aakira.napier.Napier
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
-import org.koin.dsl.module
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}): KoinApplication = startKoin {
     appDeclaration()
@@ -27,8 +26,3 @@ fun initLogger() {
     Napier.base(DebugAntilog())
 }
 
-// Shared application dependencies (repositories, use cases, view models)
-val appModule = module {
-    // single { MyRepository(get()) }
-    // factory { MyViewModel(get()) }
-}

@@ -6,7 +6,9 @@ import org.apagar.shared.domain.model.QuizSubmission
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
-class CalculateDebtInvoiceUseCase {
+class CalculateDebtInvoiceUseCase(
+    private val random: Random = Random.Default
+) {
 
     companion object {
         private const val CURRENT_YEAR = 2026
@@ -69,7 +71,7 @@ class CalculateDebtInvoiceUseCase {
         val totalPayable = (baseDebt + adjustmentsSum).coerceAtLeast(baseDebt * 0.10)
         val monthly40Years = totalPayable / PAYMENT_MONTHS_40_YEARS
 
-        val randomSerial = Random.nextInt(1000, 9999)
+        val randomSerial = random.nextInt(1000, 9999)
         val invoiceNumber = "${submission.country.code}-$CURRENT_YEAR-$randomSerial"
 
         return DebtInvoice(

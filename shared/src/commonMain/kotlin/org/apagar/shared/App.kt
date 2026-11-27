@@ -1,85 +1,69 @@
 package org.apagar.shared
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import org.apagar.shared.presentation.navigation.Screen
+import org.apagar.shared.presentation.DebtQuizViewModel
+import org.apagar.shared.presentation.QuizScreenStep
+import org.apagar.shared.presentation.ui.CalculatingScreen
+import org.apagar.shared.presentation.ui.IntroScreen
+import org.apagar.shared.presentation.ui.InvoiceReceiptScreen
+import org.apagar.shared.presentation.ui.QuizStepperScreen
 import org.apagar.shared.presentation.ui.theme.AppTheme
-import org.apagar.shared.screens.ScreenA
-import org.apagar.shared.screens.ScreenB
-import org.apagar.shared.screens.ScreenC
+import org.koin.mp.KoinPlatform
 
 @Composable
-fun App() {
+fun App(
+    viewModel: DebtQuizViewModel = remember { KoinPlatform.getKoin().get<DebtQuizViewModel>() }
+) {
+    DisposableEffect(viewModel) {
+        onDispose { viewModel.clear() }
+    }
+
+    val uiState by viewModel.uiState.collectAsState()
+
     AppTheme {
-        val navController = rememberNavController()
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
-
-        fun navigateToTab(screen: Screen) {
-            navController.navigate(screen.route) {
-                popUpTo(Screen.Home.route) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
-        }
-
         Scaffold(
-            containerColor = MaterialTheme.colorScheme.background,
-            bottomBar = {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ) {
-                    Screen.bottomBarItems.forEach { screen ->
-                        NavigationBarItem(
-                            icon = { Icon(screen.icon, contentDescription = screen.title) },
-                            label = { Text(screen.title) },
-                            selected = currentRoute == screen.route,
-                            onClick = { navigateToTab(screen) }
-                        )
-                    }
-                }
-            }
+            containerColor = MaterialTheme.colorScheme.background
         ) { paddingValues ->
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Home.route,
+            Box(
                 modifier = Modifier
-                    .padding(paddingValues)
                     .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.TopCenter
             ) {
-                composable(Screen.Home.route) {
-                    ScreenA(onNavigateToTrade = { navigateToTab(Screen.Trade) })
-                }
-                composable(Screen.Trade.route) {
-                    ScreenB(
-                        onNavigateToProfile = { navigateToTab(Screen.Profile) },
-                        onNavigateBack = { navigateToTab(Screen.Home) }
+                when (val step = uiState.step) {
+                    is QuizScreenStep.Intro -> IntroScreen(
+                        selectedCountry = uiState.selectedCountry,
+                        onStartQuiz = viewModel::startQuiz
                     )
-                }
-                composable(Screen.Profile.route) {
-                    ScreenC(
-                        onNavigateToHome = { navigateToTab(Screen.Home) },
-                        onNavigateBack = { navigateToTab(Screen.Trade) }
+                    is QuizScreenStep.QuestionStep -> QuizStepperScreen(
+                        uiState = uiState,
+                        stepIndex = step.stepIndex,
+                        onSelectCountry = viewModel::selectCountry,
+                        onUpdateBirthYear = viewModel::updateBirthYear,
+                        onSelectChildren = viewModel::selectChildren,
+                        onSelectSector = viewModel::selectSector,
+                        onSelectStealthOption = viewModel::selectStealthOption,
+                        onNext = viewModel::nextStep,
+                        onBack = viewModel::previousStep
                     )
-                }
-                composable(Screen.Settings.route) {
-                    ScreenA(onNavigateToTrade = { navigateToTab(Screen.Trade) })
+                    is QuizScreenStep.Calculating -> CalculatingScreen(
+                        statusMessageEs = step.statusMessageEs
+                    )
+                    is QuizScreenStep.Result -> InvoiceReceiptScreen(
+                        invoice = step.invoice,
+                        onReset = viewModel::resetQuiz
+                    )
                 }
             }
         }
