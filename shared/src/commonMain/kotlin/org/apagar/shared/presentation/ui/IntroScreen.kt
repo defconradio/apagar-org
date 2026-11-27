@@ -34,7 +34,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,8 +65,6 @@ fun IntroScreen(
     onStartQuiz: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var showCard by remember { mutableStateOf(false) }
-
     val shimmerTransition = rememberInfiniteTransition(label = "hero_cta_shimmer")
     val shimmerPosition by shimmerTransition.animateFloat(
         initialValue = -500f,
@@ -85,47 +82,10 @@ fun IntroScreen(
             .background(BabyBlue)
             .verticalScroll(rememberScrollState())
     ) {
-        val bannerWidth = minOf(maxWidth, 960.dp)
+        val bannerWidth = minOf(maxWidth, 1680.dp)
         val bannerHeight = bannerWidth * 9f / 16f
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(72.dp)
-                    .background(BabyBlue)
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "apagar.org",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontFamily = FontFamily(Font(Res.font.space_grotesk)),
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = (-0.8).sp,
-                    color = HeroCream,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable { showCard = false }
-                )
-
-                if (showCard) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clickable { showCard = false },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "←",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = HeroCream
-                        )
-                    }
-                }
-            }
-
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -139,49 +99,47 @@ fun IntroScreen(
                     contentScale = ContentScale.Crop
                 )
 
-                if (!showCard) {
-                    Button(
-                        onClick = { showCard = true },
-                        shape = RoundedCornerShape(6.dp),
-                        border = BorderStroke(1.dp, HeroCream.copy(alpha = 0.35f)),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = HeroInk.copy(alpha = 0.45f),
-                            contentColor = HeroCream
+                Button(
+                    onClick = onStartQuiz,
+                    shape = RoundedCornerShape(6.dp),
+                    border = BorderStroke(1.dp, HeroCream.copy(alpha = 0.35f)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = HeroInk.copy(alpha = 0.45f),
+                        contentColor = HeroCream
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(12.dp)
+                        .widthIn(min = 180.dp, max = 220.dp)
+                        .height(48.dp)
+                ) {
+                    val shimmerBrush = Brush.linearGradient(
+                        colors = listOf(
+                            HeroCream.copy(alpha = 0.62f),
+                            HeroCream,
+                            HeroCream.copy(alpha = 0.62f)
                         ),
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(12.dp)
-                            .widthIn(min = 180.dp, max = 220.dp)
-                            .height(48.dp)
-                    ) {
-                        val shimmerBrush = Brush.linearGradient(
-                            colors = listOf(
-                                HeroCream.copy(alpha = 0.62f),
-                                HeroCream,
-                                HeroCream.copy(alpha = 0.62f)
-                            ),
-                            start = Offset(shimmerPosition - 180f, 0f),
-                            end = Offset(shimmerPosition + 180f, 0f)
-                        )
+                        start = Offset(shimmerPosition - 180f, 0f),
+                        end = Offset(shimmerPosition + 180f, 0f)
+                    )
 
-                        Text(
-                            text = "Calcula mi deuda",
-                            style = TextStyle(
-                                brush = shimmerBrush,
-                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                                fontWeight = FontWeight.SemiBold,
-                                letterSpacing = 0.8.sp,
-                                textAlign = TextAlign.Center
-                            )
+                    Text(
+                        text = "Calcula mi deuda",
+                        style = TextStyle(
+                            brush = shimmerBrush,
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.8.sp,
+                            textAlign = TextAlign.Center
                         )
-                        Text(
-                            text = " →",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = HeroCream.copy(alpha = 0.78f),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                } else {
+                    )
+                    Text(
+                        text = " →",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = HeroCream.copy(alpha = 0.78f),
+                        fontWeight = FontWeight.Bold
+                    )
+                } /*else {
                     Card(
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -255,7 +213,7 @@ fun IntroScreen(
                             }
                         }
                     }
-                }
+                }*/
             }
         }
     }

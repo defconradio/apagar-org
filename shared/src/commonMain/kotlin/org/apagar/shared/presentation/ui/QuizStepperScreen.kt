@@ -3,6 +3,7 @@ package org.apagar.shared.presentation.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,16 +11,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,6 +39,9 @@ import org.apagar.shared.domain.model.StealthOption
 import org.apagar.shared.domain.model.WorkSector
 import org.apagar.shared.presentation.DebtQuizUiState
 import org.apagar.shared.presentation.DebtQuizViewModel
+import org.apagar.shared.presentation.ui.theme.BabyBlue
+import org.apagar.shared.presentation.ui.theme.HeroCream
+import org.apagar.shared.presentation.ui.theme.HeroInk
 import org.apagar.shared.presentation.ui.theme.InkMuted
 import kotlin.math.roundToInt
 
@@ -58,7 +67,7 @@ fun QuizStepperScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+            .padding(horizontal = 32.dp, vertical = 36.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -67,12 +76,14 @@ fun QuizStepperScreen(
                 style = MaterialTheme.typography.labelLarge,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
-                color = InkMuted
+                color = HeroCream
             )
             Spacer(modifier = Modifier.height(8.dp))
             LinearProgressIndicator(
                 progress = { progress },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                color = HeroCream,
+                trackColor = HeroCream.copy(alpha = 0.25f)
             )
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -111,18 +122,30 @@ fun QuizStepperScreen(
         ) {
             OutlinedButton(
                 onClick = onBack,
+                shape = RoundedCornerShape(6.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = HeroCream
+                ),
+                border = BorderStroke(1.dp, HeroCream.copy(alpha = 0.65f)),
                 modifier = Modifier
                     .weight(1f)
-                    .height(48.dp)
+                    .height(64.dp)
             ) {
                 Text("Atrás")
             }
             Button(
                 onClick = onNext,
                 enabled = canProceed,
+                shape = RoundedCornerShape(6.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = HeroInk,
+                    contentColor = HeroCream,
+                    disabledContainerColor = HeroInk.copy(alpha = 0.38f),
+                    disabledContentColor = HeroCream.copy(alpha = 0.55f)
+                ),
                 modifier = Modifier
                     .weight(1f)
-                    .height(48.dp)
+                    .height(64.dp)
             ) {
                 Text(if (isLastStep) "Emitir factura" else "Siguiente")
             }
@@ -138,14 +161,15 @@ private fun CountryStep(
 ) {
     Text(
         text = "País de residencia u origen",
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold
+        style = MaterialTheme.typography.headlineMedium,
+        fontWeight = FontWeight.Bold,
+        color = HeroCream
     )
-    Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(12.dp))
     Text(
         text = "Seleccione el tesoro nacional al que desea contribuir hoy.",
-        style = MaterialTheme.typography.bodyMedium,
-        color = InkMuted
+        style = MaterialTheme.typography.titleMedium,
+        color = HeroCream.copy(alpha = 0.82f)
     )
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -169,21 +193,22 @@ private fun BirthYearStep(
 
     Text(
         text = "¿En qué año nació?",
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold
+        style = MaterialTheme.typography.headlineMedium,
+        fontWeight = FontWeight.Bold,
+        color = HeroCream
     )
-    Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(12.dp))
     Text(
         text = "Esto determina cuántos años productivos le quedan para cancelar la deuda.",
-        style = MaterialTheme.typography.bodyMedium,
-        color = InkMuted
+        style = MaterialTheme.typography.titleMedium,
+        color = HeroCream.copy(alpha = 0.82f)
     )
     Spacer(modifier = Modifier.height(24.dp))
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        colors = CardDefaults.cardColors(containerColor = HeroCream),
+        border = BorderStroke(1.dp, HeroInk)
     ) {
         Column(
             modifier = Modifier
@@ -195,7 +220,8 @@ private fun BirthYearStep(
                 text = birthYear.toString(),
                 style = MaterialTheme.typography.displaySmall,
                 fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.ExtraBold
+                fontWeight = FontWeight.ExtraBold,
+                color = HeroInk
             )
             Text(
                 text = "Edad estimada en 2026: $estimatedAge años",
@@ -207,6 +233,11 @@ private fun BirthYearStep(
                 value = birthYear.toFloat(),
                 onValueChange = { onUpdateBirthYear(it.roundToInt()) },
                 valueRange = 1930f..2025f,
+                colors = SliderDefaults.colors(
+                    thumbColor = HeroInk,
+                    activeTrackColor = HeroInk,
+                    inactiveTrackColor = BabyBlue.copy(alpha = 0.45f)
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -216,12 +247,16 @@ private fun BirthYearStep(
             ) {
                 OutlinedButton(
                     onClick = { onUpdateBirthYear(birthYear - 1) },
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = HeroInk),
+                    border = BorderStroke(1.dp, HeroInk),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("-1 año")
                 }
                 OutlinedButton(
                     onClick = { onUpdateBirthYear(birthYear + 1) },
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = HeroInk),
+                    border = BorderStroke(1.dp, HeroInk),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("+1 año")
@@ -238,14 +273,15 @@ private fun ChildrenStep(
 ) {
     Text(
         text = "¿Cuántos hijos tiene?",
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold
+        style = MaterialTheme.typography.headlineMedium,
+        fontWeight = FontWeight.Bold,
+        color = HeroCream
     )
-    Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(12.dp))
     Text(
         text = "Más hijos significan más futuros contribuyentes para compartir la cuenta.",
-        style = MaterialTheme.typography.bodyMedium,
-        color = InkMuted
+        style = MaterialTheme.typography.titleMedium,
+        color = HeroCream.copy(alpha = 0.82f)
     )
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -267,14 +303,15 @@ private fun WorkSectorStep(
 ) {
     Text(
         text = "¿En qué sector se desempeña?",
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold
+        style = MaterialTheme.typography.headlineMedium,
+        fontWeight = FontWeight.Bold,
+        color = HeroCream
     )
-    Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(12.dp))
     Text(
         text = "Necesitamos evaluar su nivel de contribución real al PIB.",
-        style = MaterialTheme.typography.bodyMedium,
-        color = InkMuted
+        style = MaterialTheme.typography.titleMedium,
+        color = HeroCream.copy(alpha = 0.82f)
     )
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -305,8 +342,9 @@ private fun StealthQuestionStep(
     Spacer(modifier = Modifier.height(6.dp))
     Text(
         text = questionEs,
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold
+        style = MaterialTheme.typography.headlineMedium,
+        fontWeight = FontWeight.Bold,
+        color = HeroCream
     )
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -328,16 +366,8 @@ private fun SelectableOptionCard(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val borderColor = if (selected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.outline
-    }
-    val containerColor = if (selected) {
-        MaterialTheme.colorScheme.surfaceVariant
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
+    val borderColor = if (selected) HeroCream else HeroCream.copy(alpha = 0.72f)
+    val containerColor = if (selected) HeroInk else HeroCream
 
     Card(
         modifier = Modifier
@@ -349,22 +379,30 @@ private fun SelectableOptionCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = 20.dp, vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RadioButton(selected = selected, onClick = onClick)
+            RadioButton(
+                selected = selected,
+                onClick = onClick,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = HeroCream,
+                    unselectedColor = HeroInk.copy(alpha = 0.55f)
+                )
+            )
             Column(modifier = Modifier.padding(start = 8.dp)) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                    color = if (selected) HeroCream else HeroInk
                 )
                 if (subtitle != null) {
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
                         fontFamily = FontFamily.Monospace,
-                        color = InkMuted
+                        color = if (selected) HeroCream.copy(alpha = 0.82f) else InkMuted
                     )
                 }
             }
