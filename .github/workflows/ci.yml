@@ -28,23 +28,23 @@ jobs:
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: wrapper
 
       - name: Build Android App
-        run: ./gradlew :androidApp:assembleDebug --no-daemon -Dorg.gradle.jvmargs="-Xmx3g" -Dkotlin.daemon.jvmargs="-Xmx2g"
+        run: ./gradlew :androidApp:assembleDebug --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g" -Dkotlin.daemon.jvmargs="-Xmx2g"
 
       - name: Build Shared Module (Wasm & JVM)
-        run: ./gradlew :shared:assemble --no-daemon -Dorg.gradle.jvmargs="-Xmx3g" -Dkotlin.daemon.jvmargs="-Xmx2g"
+        run: ./gradlew :shared:assemble --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g" -Dkotlin.daemon.jvmargs="-Xmx2g"
 
       - name: Build Web App (Wasm)
-        run: ./gradlew :composeApp:wasmJsBrowserDistribution --no-daemon -Dorg.gradle.jvmargs="-Xmx3g" -Dkotlin.daemon.jvmargs="-Xmx2g"
+        run: ./gradlew :composeApp:wasmJsBrowserDistribution --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g" -Dkotlin.daemon.jvmargs="-Xmx2g"
 
       - name: Run Tests (JVM & Android)
-        run: ./gradlew :shared:jvmTest :shared:testDebugUnitTest --no-daemon -Dorg.gradle.jvmargs="-Xmx3g" -Dkotlin.daemon.jvmargs="-Xmx2g"
+        run: ./gradlew :shared:jvmTest :shared:testDebugUnitTest --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g" -Dkotlin.daemon.jvmargs="-Xmx2g"
 
       - name: Run Tests (Wasm)
         run: |
           export CHROME_BIN=$(which google-chrome || which chromium-browser || which chromium)
-          ./gradlew :shared:wasmJsBrowserTest --no-daemon -Dorg.gradle.jvmargs="-Xmx3g" -Dkotlin.daemon.jvmargs="-Xmx2g"
+          ./gradlew :shared:wasmJsBrowserTest --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g" -Dkotlin.daemon.jvmargs="-Xmx2g"

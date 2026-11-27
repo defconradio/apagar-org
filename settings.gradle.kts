@@ -9,6 +9,8 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        // Google's official Maven Central mirror avoids HTTP 429 throttling on CI runners
+        maven("https://maven-central.storage-download.googleapis.com/maven2")
         mavenCentral()
         gradlePluginPortal()
     }
@@ -24,6 +26,7 @@ dependencyResolutionManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        maven("https://maven-central.storage-download.googleapis.com/maven2")
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
