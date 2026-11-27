@@ -20,7 +20,7 @@ A production-ready Kotlin Multiplatform scaffold designed for scalability, featu
 The `shared` module is organized following Clean Architecture principles:
 
 ```text
-shared/src/commonMain/kotlin/com/example/shared/
+shared/src/commonMain/kotlin/org/apagar/shared/
 ├── di/                 # Dependency Injection (Koin Modules)
 ├── domain/             # Business Logic (Entities, Use Cases, Repository Interfaces)
 ├── data/               # Data Layer (API Implementations, DTOs, Repository Impls)
@@ -41,7 +41,7 @@ shared/src/commonMain/composeResources/
 1.  **Koin:** Pre-configured `initKoin`, `platformModule`, and `networkModule` for cross-platform DI.
 2.  **Ktor Client:** Configured with JSON serialization (`kotlinx.serialization`) and Timeouts.
 3.  **Napier:** Initialized via `initLogger()` on Android, iOS, and Wasm for cross-platform logging.
-4.  **Compose Resources:** Type-safe access to resources via `com.example.shared.resources.Res`.
+4.  **Compose Resources:** Type-safe access to resources via `org.apagar.shared.resources.Res`.
 
 ## 🏗️ How to Build
 
