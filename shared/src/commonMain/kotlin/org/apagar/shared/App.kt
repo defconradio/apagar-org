@@ -1,5 +1,11 @@
 package org.apagar.shared
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -12,6 +18,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,6 +43,7 @@ import org.apagar.shared.presentation.ui.QuizStepperScreen
 import org.apagar.shared.presentation.ui.theme.AppTheme
 import org.apagar.shared.presentation.ui.theme.BabyBlue
 import org.apagar.shared.presentation.ui.theme.HeroCream
+import org.apagar.shared.presentation.ui.theme.HeroInk
 import org.apagar.shared.resources.Res
 import org.apagar.shared.resources.space_grotesk
 import org.jetbrains.compose.resources.Font
@@ -49,6 +58,17 @@ fun App(
     }
 
     val uiState by viewModel.uiState.collectAsState()
+
+    val tickerTransition = rememberInfiniteTransition(label = "footer_ticker")
+    val tickerOffset by tickerTransition.animateFloat(
+        initialValue = 900f,
+        targetValue = -900f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 30000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "footer_ticker_offset"
+    )
 
     AppTheme {
         Scaffold(
@@ -98,7 +118,9 @@ fun App(
                 }
 
                 BoxWithConstraints(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
                 ) {
                     val contentWidth = if (uiState.step is QuizScreenStep.Intro) {
                         minOf(maxWidth, 1680.dp)
@@ -136,6 +158,35 @@ fun App(
                             is QuizScreenStep.Result -> InvoiceReceiptScreen(
                                 invoice = step.invoice,
                                 onReset = viewModel::resetQuiz
+                            )
+                        }
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .background(HeroInk.copy(alpha = 0.88f))
+                        .clipToBounds(),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    val tickerText = "APAGAR.ORG  •  DEUDA EXTERNA  •  CUOTA PATRIÓTICA  •  "
+                    Row(
+                        modifier = Modifier.graphicsLayer {
+                            translationX = tickerOffset
+                        },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        repeat(8) {
+                            Text(
+                                text = tickerText,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                color = HeroCream,
+                                letterSpacing = 1.sp,
+                                softWrap = false
                             )
                         }
                     }
