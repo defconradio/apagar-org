@@ -28,5 +28,5 @@ dependencyResolutionManagement {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
-rootProject.name = "aguacate"
+rootProject.name = "apagar-org"
 include(":shared", ":androidApp", ":composeApp")

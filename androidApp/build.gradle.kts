@@ -8,10 +8,10 @@ plugins {
 
 android {
     compileSdk = 35
-    namespace = "com.example.androidApp"
+    namespace = "org.apagar.androidApp"
 
     defaultConfig {
-        applicationId = "com.example.androidApp"
+        applicationId = "org.apagar.androidApp"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

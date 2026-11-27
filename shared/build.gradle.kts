@@ -97,11 +97,11 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "com.example.shared.resources"
+    packageOfResClass = "org.apagar.shared.resources"
 }
 
 android {
-    namespace = "com.example.shared"
+    namespace = "org.apagar.shared"
     compileSdk = 35
     defaultConfig {
         minSdk = 24
