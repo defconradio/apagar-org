@@ -1,13 +1,9 @@
 package org.apagar.shared
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -18,22 +14,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.rememberScrollState
+import kotlinx.coroutines.delay
+import org.apagar.shared.domain.model.QuizActivity
 import org.apagar.shared.presentation.DebtQuizViewModel
 import org.apagar.shared.presentation.QuizScreenStep
 import org.apagar.shared.presentation.ui.CalculatingScreen
@@ -49,6 +39,20 @@ import org.apagar.shared.resources.space_grotesk
 import org.jetbrains.compose.resources.Font
 import org.koin.mp.KoinPlatform
 
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
 @Composable
 fun App(
     viewModel: DebtQuizViewModel = remember { KoinPlatform.getKoin().get<DebtQuizViewModel>() }
@@ -58,17 +62,6 @@ fun App(
     }
 
     val uiState by viewModel.uiState.collectAsState()
-
-    val tickerTransition = rememberInfiniteTransition(label = "footer_ticker")
-    val tickerOffset by tickerTransition.animateFloat(
-        initialValue = 900f,
-        targetValue = -900f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 30000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "footer_ticker_offset"
-    )
 
     AppTheme {
         Scaffold(
@@ -171,27 +164,78 @@ fun App(
                         .clipToBounds(),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    val tickerText = "APAGAR.ORG  •  DEUDA EXTERNA  •  CUOTA PATRIÓTICA  •  "
-                    Row(
-                        modifier = Modifier.graphicsLayer {
-                            translationX = tickerOffset
-                        },
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        repeat(8) {
-                            Text(
-                                text = tickerText,
-                                style = MaterialTheme.typography.labelLarge,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                color = HeroCream,
-                                letterSpacing = 1.sp,
-                                softWrap = false
-                            )
+                    val tickerScrollState = rememberScrollState()
+                    var tickerCopyWidth by remember { mutableStateOf(0f) }
+                    var tickerSnapshotText by remember { mutableStateOf("") }
+
+                    LaunchedEffect(uiState.tickerActivities) {
+                        if (tickerSnapshotText.isEmpty() && uiState.tickerActivities.isNotEmpty()) {
+                            tickerSnapshotText = uiState.tickerActivities.joinToString("   •   ") { activity ->
+                                "${activity.fullName}(${activity.countryCode}) · $${formatTickerAmount(activity)}"
+                            }
+                        }
+                    }
+
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            delay(90_000)
+                            tickerScrollState.scrollTo(0)
+                            tickerCopyWidth = 0f
+                            tickerSnapshotText = uiState.tickerActivities.joinToString("   •   ") { activity ->
+                                "${activity.fullName}(${activity.countryCode}) · $${formatTickerAmount(activity)}"
+                            }
+                        }
+                    }
+
+                    if (uiState.tickerActivities.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .horizontalScroll(tickerScrollState)
+                                .onGloballyPositioned { coordinates ->
+                                    tickerCopyWidth = coordinates.size.width / 2f
+                                },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            repeat(2) {
+                                Text(
+                                    text = tickerSnapshotText,
+                                    modifier = Modifier.padding(end = 48.dp),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.Bold,
+                                    color = HeroCream,
+                                    letterSpacing = 1.sp,
+                                    softWrap = false
+                                )
+                            }
+                        }
+                    }
+
+                    LaunchedEffect(tickerCopyWidth) {
+                        while (tickerCopyWidth > 0f) {
+                            if (tickerScrollState.value >= tickerCopyWidth.toInt()) {
+                                tickerScrollState.scrollTo(0)
+                            } else {
+                                tickerScrollState.scrollBy(0.6f)
+                            }
+                            delay(16)
                         }
                     }
                 }
             }
         }
     }
+}
+
+private fun formatTickerAmount(activity: QuizActivity): String {
+    val cents = (activity.debtAmountUsd * 100).toLong()
+    val whole = cents / 100
+    val fraction = (cents % 100).toString().padStart(2, '0')
+    val grouped = whole.toString()
+        .reversed()
+        .chunked(3)
+        .joinToString(".")
+        .reversed()
+
+    return "$grouped,$fraction"
 }

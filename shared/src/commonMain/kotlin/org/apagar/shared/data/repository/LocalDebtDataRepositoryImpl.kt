@@ -1,7 +1,14 @@
 package org.apagar.shared.data.repository
 
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
+import org.apagar.shared.data.dummy.DummyQuizActivityData
 import org.apagar.shared.domain.model.CountryDebtProfile
 import org.apagar.shared.domain.model.IdeologyAlignment
+import org.apagar.shared.domain.model.QuizActivity
 import org.apagar.shared.domain.model.StealthOption
 import org.apagar.shared.domain.model.StealthQuestion
 import org.apagar.shared.domain.repository.DebtDataRepository
@@ -84,4 +91,16 @@ class LocalDebtDataRepositoryImpl : DebtDataRepository {
     override fun getCountries(): List<CountryDebtProfile> = countries
 
     override fun getRandomStealthQuestion(): StealthQuestion = stealthQuestions.random()
+
+    // Método para obtener las actividades de cuestionario más recientes
+    override fun getRecentQuizActivities(): List<QuizActivity> =
+        DummyQuizActivityData.recentActivities(count = 500)
+
+    override fun observeQuizActivities(): Flow<QuizActivity> = flow {
+        emit(DummyQuizActivityData.randomActivity())
+        while (currentCoroutineContext().isActive) {
+            delay(6500)
+            emit(DummyQuizActivityData.randomActivity())
+        }
+    }
 }

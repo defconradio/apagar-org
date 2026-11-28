@@ -1,8 +1,11 @@
 package org.apagar.shared.presentation.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -10,6 +13,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -23,8 +29,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -35,11 +41,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -82,15 +90,60 @@ fun IntroScreen(
             .background(BabyBlue)
             .verticalScroll(rememberScrollState())
     ) {
-        val bannerWidth = minOf(maxWidth, 1680.dp)
-        val bannerHeight = bannerWidth * 9f / 16f
+        val availableWidth = maxWidth - if (maxWidth >= 600.dp) 48.dp else 32.dp
+        val viewportBannerWidth = if (maxWidth >= 600.dp) {
+            (maxHeight - 32.dp) * 1792f / 592f
+        } else {
+            availableWidth
+        }
+        val bannerWidth = if (maxWidth >= 600.dp) {
+            minOf(availableWidth, 1680.dp, viewportBannerWidth)
+        } else {
+            availableWidth
+        }
+        val bannerHeight = bannerWidth * 592f / 1792f
 
-        Column(modifier = Modifier.fillMaxWidth()) {
+        val topBannerPadding = if (maxWidth >= 600.dp) 24.dp else 16.dp
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = topBannerPadding)
+        ) {
+            val bannerInteraction = remember { MutableInteractionSource() }
+            val isBannerHovered by bannerInteraction.collectIsHoveredAsState()
+            val isBannerPressed by bannerInteraction.collectIsPressedAsState()
+
+            val bannerScale by animateFloatAsState(
+                targetValue = if (isBannerPressed) 0.995f else if (isBannerHovered) 1.018f else 1f,
+                animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+                label = "banner_scale"
+            )
+            val bannerElevation by animateDpAsState(
+                targetValue = if (isBannerHovered) 16.dp else 4.dp,
+                animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+                label = "banner_elevation"
+            )
+
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .width(bannerWidth)
                     .height(bannerHeight)
+                    .shadow(
+                        elevation = bannerElevation,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .clip(RoundedCornerShape(12.dp))
+                    .graphicsLayer {
+                        scaleX = bannerScale
+                        scaleY = bannerScale
+                    }
+                    .clickable(
+                        interactionSource = bannerInteraction,
+                        indication = null,
+                        onClick = onStartQuiz
+                    )
             ) {
                 Image(
                     painter = painterResource(Res.drawable.hero),
@@ -99,12 +152,16 @@ fun IntroScreen(
                     contentScale = ContentScale.Crop
                 )
 
+                val interactionSource = remember { MutableInteractionSource() }
+                val isHovered by interactionSource.collectIsHoveredAsState()
+                val isPressed by interactionSource.collectIsPressedAsState()
+
                 Button(
                     onClick = onStartQuiz,
                     shape = RoundedCornerShape(6.dp),
                     border = BorderStroke(1.dp, HeroCream.copy(alpha = 0.35f)),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = HeroInk.copy(alpha = 0.45f),
+                        containerColor = HeroInk.copy(alpha = 0.28f),
                         contentColor = HeroCream
                     ),
                     modifier = Modifier
@@ -215,6 +272,8 @@ fun IntroScreen(
                     }
                 }*/
             }
+
+            Spacer(modifier = Modifier.height(56.dp))
         }
     }
 }

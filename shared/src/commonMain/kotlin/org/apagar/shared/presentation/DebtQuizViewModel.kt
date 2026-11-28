@@ -10,10 +10,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.apagar.shared.domain.model.ChildrenBracket
 import org.apagar.shared.domain.model.CountryDebtProfile
+import org.apagar.shared.domain.model.QuizActivity
 import org.apagar.shared.domain.model.QuizSubmission
 import org.apagar.shared.domain.model.StealthOption
 import org.apagar.shared.domain.model.WorkSector
@@ -32,15 +34,39 @@ class DebtQuizViewModel(
     private val initialCountry = countries.first()
     private val initialStealthQuestion = repository.getRandomStealthQuestion()
 
+    private val recentQuizActivities = repository.getRecentQuizActivities()
+    private val tickerBufferSize = 50
+    private var tickerJob: Job? = null
+
+    private fun initialTickerActivities(): List<QuizActivity> =
+        recentQuizActivities.shuffled().take(tickerBufferSize)
+
     private val _uiState = MutableStateFlow(
         DebtQuizUiState(
             step = QuizScreenStep.Intro,
             availableCountries = countries,
             selectedCountry = initialCountry,
-            stealthQuestion = initialStealthQuestion
+            stealthQuestion = initialStealthQuestion,
+            recentQuizActivities = recentQuizActivities,
+            tickerActivities = initialTickerActivities()
         )
     )
     val uiState: StateFlow<DebtQuizUiState> = _uiState.asStateFlow()
+
+    init {
+        startTicker()
+    }
+
+    private fun startTicker() {
+        tickerJob?.cancel()
+        tickerJob = viewModelScope.launch {
+            repository.observeQuizActivities().collect { activity ->
+                val currentBuffer = _uiState.value.tickerActivities
+                val updatedBuffer = (currentBuffer + activity).takeLast(tickerBufferSize)
+                _uiState.update { it.copy(tickerActivities = updatedBuffer) }
+            }
+        }
+    }
 
     fun startQuiz() {
         calculationJob?.cancel()
@@ -139,5 +165,6 @@ class DebtQuizViewModel(
     companion object {
         const val TOTAL_STEPS = 5
         private const val LAST_STEP_INDEX = TOTAL_STEPS - 1
+        private const val TICKER_INTERVAL_MS = 6500L
     }
 }
