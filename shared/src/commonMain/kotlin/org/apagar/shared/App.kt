@@ -1,9 +1,11 @@
 package org.apagar.shared
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -35,8 +37,10 @@ import org.apagar.shared.presentation.ui.theme.BabyBlue
 import org.apagar.shared.presentation.ui.theme.HeroCream
 import org.apagar.shared.presentation.ui.theme.HeroInk
 import org.apagar.shared.resources.Res
+import org.apagar.shared.resources.apagar_logo
 import org.apagar.shared.resources.space_grotesk
 import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.resources.painterResource
 import org.koin.mp.KoinPlatform
 
 import androidx.compose.runtime.setValue
@@ -44,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -73,39 +78,34 @@ fun App(
                     .padding(paddingValues)
                     .background(BabyBlue)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(72.dp)
-                        .background(BabyBlue)
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "apagar.org",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = FontFamily(Font(Res.font.space_grotesk)),
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = (-0.8).sp,
-                        color = HeroCream,
-                        modifier = Modifier
-                            .weight(1f)
-                    )
+                BoxWithConstraints {
+                    val logoWidth = if (maxWidth < 600.dp) 120.dp else 160.dp
+                    val logoHeight = if (maxWidth < 600.dp) 48.dp else 64.dp
+                    val headerTopPadding = if (maxWidth < 600.dp) 4.dp else 8.dp
 
-                    if (uiState.step !is QuizScreenStep.Intro) {
-                        Box(
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(72.dp)
+                            .background(BabyBlue)
+                            .padding(start = 16.dp, top = headerTopPadding, end = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.apagar_logo),
+                            contentDescription = "apagar.org",
                             modifier = Modifier
-                                .size(44.dp)
-                                .clickable(onClick = viewModel::resetQuiz),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "←",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = HeroCream
-                            )
-                        }
+                                .width(logoWidth)
+                                .height(logoHeight)
+                                .weight(1f, fill = false)
+                                .clickable(
+                                    interactionSource = null,
+                                    indication = null,
+                                    onClick = viewModel::resetQuiz
+                                ),
+                            contentScale = ContentScale.Fit,
+                            alignment = Alignment.CenterStart
+                        )
                     }
                 }
 
