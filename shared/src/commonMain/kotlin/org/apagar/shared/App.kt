@@ -90,7 +90,6 @@ fun App(
                         color = HeroCream,
                         modifier = Modifier
                             .weight(1f)
-                            .clickable(onClick = viewModel::resetQuiz)
                     )
 
                     if (uiState.step !is QuizScreenStep.Intro) {

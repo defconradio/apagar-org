@@ -10,12 +10,14 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -36,6 +38,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -103,6 +106,11 @@ fun IntroScreen(
         }
         val bannerHeight = bannerWidth * 592f / 1792f
 
+        val isMobileBanner = maxWidth < 600.dp
+        val ctaWidth = if (isMobileBanner) 150.dp else bannerWidth.coerceIn(180.dp, 220.dp)
+        val ctaHeight = if (isMobileBanner) 36.dp else 48.dp
+        val ctaPadding = if (isMobileBanner) 8.dp else 12.dp
+
         val topBannerPadding = if (maxWidth >= 600.dp) 24.dp else 16.dp
 
         Column(
@@ -152,23 +160,22 @@ fun IntroScreen(
                     contentScale = ContentScale.Crop
                 )
 
-                val interactionSource = remember { MutableInteractionSource() }
-                val isHovered by interactionSource.collectIsHoveredAsState()
-                val isPressed by interactionSource.collectIsPressedAsState()
-
-                Button(
-                    onClick = onStartQuiz,
-                    shape = RoundedCornerShape(6.dp),
-                    border = BorderStroke(1.dp, HeroCream.copy(alpha = 0.35f)),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = HeroInk.copy(alpha = 0.28f),
-                        contentColor = HeroCream
-                    ),
+                Row(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(12.dp)
-                        .widthIn(min = 180.dp, max = 220.dp)
-                        .height(48.dp)
+                        .padding(ctaPadding)
+                        .width(ctaWidth)
+                        .height(ctaHeight)
+                        .clip(RoundedCornerShape(if (isMobileBanner) 4.dp else 6.dp))
+                        .background(HeroInk.copy(alpha = 0.28f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onStartQuiz
+                        )
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     val shimmerBrush = Brush.linearGradient(
                         colors = listOf(
@@ -181,96 +188,20 @@ fun IntroScreen(
                     )
 
                     Text(
-                        text = "Calcula mi deuda",
+                        text = "calcula tu deuda",
                         style = TextStyle(
                             brush = shimmerBrush,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                            fontSize = if (isMobileBanner) {
+                                MaterialTheme.typography.labelMedium.fontSize
+                            } else {
+                                MaterialTheme.typography.labelLarge.fontSize
+                            },
                             fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 0.8.sp,
+                            letterSpacing = if (isMobileBanner) 0.4.sp else 0.8.sp,
                             textAlign = TextAlign.Center
                         )
                     )
-                    Text(
-                        text = " →",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = HeroCream.copy(alpha = 0.78f),
-                        fontWeight = FontWeight.Bold
-                    )
-                } /*else {
-                    Card(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .fillMaxWidth()
-                            .widthIn(max = 560.dp)
-                            .padding(horizontal = 16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        border = BorderStroke(2.dp, HeroInk)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "APAGAR.ORG • NOTIFICACIÓN FISCAL",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                color = StampRed,
-                                textAlign = TextAlign.Center
-                            )
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            Text(
-                                text = "¡Felicidades! Usted debe ${formatUsd(selectedCountry.basePerCapitaDebtUsd)} USD.",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.ExtraBold,
-                                textAlign = TextAlign.Center
-                            )
-
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            Text(
-                                text = "La deuda externa no se paga sola. Calcule su cuota patriótica en menos de 60 segundos y descubra cuánto le toca aportar para sacar al país adelante.",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = InkMuted,
-                                textAlign = TextAlign.Center
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-                            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            Text(
-                                text = "${selectedCountry.flagEmoji} Referencia base (${selectedCountry.nameEs}): ${selectedCountry.dataSourceNoteEs} (${selectedCountry.lastUpdatedYear})",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontFamily = FontFamily.Monospace,
-                                color = InkMuted,
-                                textAlign = TextAlign.Center
-                            )
-
-                            Spacer(modifier = Modifier.height(20.dp))
-
-                            Button(
-                                onClick = onStartQuiz,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = HeroInk,
-                                    contentColor = HeroCream
-                                )
-                            ) {
-                                Text(
-                                    text = "Calcular mi factura",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                }*/
+                }
             }
 
             Spacer(modifier = Modifier.height(56.dp))
